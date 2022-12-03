@@ -1,4 +1,4 @@
-import { Code, Text } from "@chakra-ui/react";
+import { Box, Button, Code, Input, Text } from "@chakra-ui/react";
 import axios, { AxiosRequestConfig } from "axios";
 
 import { FormEvent, useState } from "react";
@@ -11,6 +11,7 @@ const API_HOST = "http://127.0.0.1:8000";
 
 const Index = () => {
   const [file, setFile] = useState(null);
+  const [inputOptions, setInputOptions] = useState([]);
 
   // Upload file
   const handleFileSubmit = async (e) => {
@@ -20,14 +21,37 @@ const Index = () => {
     const headers = {
       "Content-Type": file.type,
     };
-    await axios.post(`${API_HOST}/uploadfile`, formdata, headers).then();
+    await axios
+      .post(`${API_HOST}/uploadfile`, formdata, headers)
+      .then((response) => {
+        console.log("response");
+        console.log(response);
+      });
   };
-  
+
   // Change state
-  function handleChange(e) {
-    console.log(e.target.files);
+  const handleChange = (e) => {
     setFile(e.target.files[0]); //store uploaded file in "file" variable with useState
   }
+
+  const handleInputOptionChange = (options) => {
+    console.log(options)
+  }
+
+  const defaultOptions = [
+    {
+      label: "dog",
+      value: "dog",
+    },
+    {
+      label: "cat",
+      value: "cat",
+    },
+    {
+      label: "frog",
+      value: "frog",
+    },
+  ]
   return (
     <Container height="100vh">
       <Hero />
@@ -38,14 +62,21 @@ const Index = () => {
         </Text>
         {/* TODO: USE CHAKRA */}
         <form onSubmit={(e) => handleFileSubmit(e)}>
-          <input
+          <Input
             onChange={handleChange}
             name="files"
             type="file"
             accept=".csv"
           />
-          <input type="submit" />
+          <Input type="submit" />
         </form>
+        <Button>Train model</Button>
+        {/* <MultiSelect
+          options={defaultOptions}
+          value={inputOptions}
+          label="Choose an item"
+          onChange={(options) => handleInputOptionChange(options)}
+        /> */}
       </Main>
 
       <DarkModeSwitch />

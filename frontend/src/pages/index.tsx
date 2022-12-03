@@ -1,4 +1,19 @@
-import { Box, Button, Code, Input, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Checkbox,
+  CheckboxGroup,
+  Code,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  HStack,
+  Input,
+  Radio,
+  RadioGroup,
+  Select,
+  Text,
+} from "@chakra-ui/react";
 import axios, { AxiosRequestConfig } from "axios";
 
 import { FormEvent, useState } from "react";
@@ -11,7 +26,11 @@ const API_HOST = "http://127.0.0.1:8000";
 
 const Index = () => {
   const [file, setFile] = useState(null);
-  const [inputOptions, setInputOptions] = useState([]);
+  const [allInputOptions, setAllInputOptions] = useState([]);
+  const [allOutputOptions, setAllOutputOptions] = useState([]);
+
+  const [inputOptions, setInputOptions] = useState(null);
+  const [outputOption, setOutputOption] = useState(null);
 
   // Upload file
   const handleFileSubmit = async (e) => {
@@ -24,42 +43,34 @@ const Index = () => {
     await axios
       .post(`${API_HOST}/uploadfile`, formdata, headers)
       .then((response) => {
-        console.log("response");
-        console.log(response);
+        setAllInputOptions(response.data.allInputOptions);
+        setAllOutputOptions(response.data.allOutputOptions);
       });
   };
 
-  // Change state
+  // Change file state
   const handleChange = (e) => {
     setFile(e.target.files[0]); //store uploaded file in "file" variable with useState
-  }
+  };
 
-  const handleInputOptionChange = (options) => {
-    console.log(options)
-  }
+  const handleTrainModel = async () => {
+    const postData = {
+      inputOptions,
+      outputOption,
+    };
+    await axios
+      .post(`${API_HOST}/train_model`, postData)
+      .then((response) => {});
+  };
 
-  const defaultOptions = [
-    {
-      label: "dog",
-      value: "dog",
-    },
-    {
-      label: "cat",
-      value: "cat",
-    },
-    {
-      label: "frog",
-      value: "frog",
-    },
-  ]
   return (
     <Container height="100vh">
       <Hero />
       <Main>
-        <Text color="text">
+        {/* <Text color="text">
           Example repository of <Code>Next.js</Code> + <Code>chakra-ui</Code> +{" "}
           <Code>TypeScript</Code>.
-        </Text>
+        </Text> */}
         {/* TODO: USE CHAKRA */}
         <form onSubmit={(e) => handleFileSubmit(e)}>
           <Input
@@ -70,13 +81,34 @@ const Index = () => {
           />
           <Input type="submit" />
         </form>
-        <Button>Train model</Button>
-        {/* <MultiSelect
-          options={defaultOptions}
-          value={inputOptions}
-          label="Choose an item"
-          onChange={(options) => handleInputOptionChange(options)}
-        /> */}
+        {/* select input */}
+        {allInputOptions.length > 0 && (
+          <FormControl as="fieldset">
+            <FormLabel as="legend">Select input features</FormLabel>
+            <CheckboxGroup onChange={setInputOptions}>
+              <HStack spacing="24px">
+                {allInputOptions.map((inputOption) => (
+                  <Checkbox key={inputOption} value={inputOption}>{inputOption}</Checkbox>
+                ))}
+              </HStack>
+            </CheckboxGroup>
+          </FormControl>
+        )}
+        {allOutputOptions.length > 0 && (
+          <FormControl as="fieldset">
+            <FormLabel as="legend">Select output feature</FormLabel>
+            <RadioGroup onChange={setOutputOption}>
+              <HStack spacing="24px">
+                {allOutputOptions.map((outputOption) => (
+                  <Radio key={outputOption} value={outputOption}>{outputOption}</Radio>
+                ))}
+              </HStack>
+            </RadioGroup>
+          </FormControl>
+        )}
+        {inputOptions && outputOption && (
+          <Button onClick={handleTrainModel}>Train model</Button>
+        )}
       </Main>
 
       <DarkModeSwitch />

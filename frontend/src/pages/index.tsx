@@ -1,34 +1,40 @@
-import {
-  Link as ChakraLink,
-  Text,
-  Code,
-  List,
-  ListIcon,
-  ListItem,
-  Button,
-} from "@chakra-ui/react";
-import { CheckCircleIcon, LinkIcon } from "@chakra-ui/icons";
+import { Code, Text } from "@chakra-ui/react";
+import axios from "axios";
 
-import { Hero } from "../components/Hero";
+import { FormEvent, useState } from "react";
 import { Container } from "../components/Container";
-import { Main } from "../components/Main";
 import { DarkModeSwitch } from "../components/DarkModeSwitch";
-import { CTA } from "../components/CTA";
-import { Footer } from "../components/Footer";
-import { useState } from "react";
+import { Hero } from "../components/Hero";
+import { Main } from "../components/Main";
 
 const API_HOST = "http://127.0.0.1:8000";
 
 const Index = () => {
   const [data, setData] = useState(null);
-  const handleButtonClick = () => {
-    fetch(`${API_HOST}/items/5?q=dogwater`)
-      .then((res) => res.json())
-      .then((data) => {
-        setData(data);
-      });
-    console.log("data:", data)
+  const [file, setFile] = useState(null);
+
+  // const handleFileSubmit = (e: FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   console.log("event");
+  //   console.log(e);
+  //   console.log("event.target");
+  //   console.log(e.target);
+  // };
+
+  //when upload button clicked
+  const handleFileSubmit = async (e) => {
+    e.preventDefault()
+    console.log(file[0].name);
+    const formdata = new FormData();
+    formdata.append("file", file[0]);
+    const headers = { "Content-Type": file[0].type };
+    await axios.post(`${API_HOST}/uploadfile`, formdata, headers).then();
   };
+  // this is when file has been selected
+  function handleChange(e) {
+    console.log(e.target.files)
+    setFile(e.target.files); //store uploaded file in "file" variable with useState
+  }
   return (
     <Container height="100vh">
       <Hero />
@@ -37,9 +43,28 @@ const Index = () => {
           Example repository of <Code>Next.js</Code> + <Code>chakra-ui</Code> +{" "}
           <Code>TypeScript</Code>.
         </Text>
-        <Button onClick={handleButtonClick}>make request</Button>
+        {/* <Button>
+        <FileDrop onTargetClick={onTargetClick} children={""} />
+          <input
+            onChange={onFileInputChange}
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+          />
+        </Button>
+        <Button onClick={handleButtonClick}>upload file</Button> */}
 
-        <List spacing={3} my={0} color="text">
+        <form
+          // action={`${API_HOST}/uploadfile/`}
+          // encType="multipart/form-data"
+          // method="post"
+          onSubmit={(e) => handleFileSubmit(e)}
+        >
+          <input onChange={handleChange} name="files" type="file" />
+          <input type="submit" />
+        </form>
+
+        {/* <List spacing={3} my={0} color="text">
           <ListItem>
             <ListIcon as={CheckCircleIcon} color="green.500" />
             <ChakraLink
@@ -62,14 +87,14 @@ const Index = () => {
               Next.js <LinkIcon />
             </ChakraLink>
           </ListItem>
-        </List>
+        </List> */}
       </Main>
 
       <DarkModeSwitch />
-      <Footer>
+      {/* <Footer>
         <Text>Next ❤️ Chakra</Text>
       </Footer>
-      <CTA />
+      <CTA /> */}
     </Container>
   );
 };

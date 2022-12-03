@@ -54,10 +54,17 @@ const Index = () => {
   };
 
   const handleTrainModel = async () => {
+    const formdata = new FormData();
+    formdata.append("file", file);
+    // const headers = {
+    //   "Content-Type": file.type,
+    // };
     const postData = {
+      formdata,
       inputOptions,
       outputOption,
     };
+
     await axios
       .post(`${API_HOST}/train_model`, postData)
       .then((response) => {});
@@ -67,12 +74,7 @@ const Index = () => {
     <Container height="100vh">
       <Hero />
       <Main>
-        {/* <Text color="text">
-          Example repository of <Code>Next.js</Code> + <Code>chakra-ui</Code> +{" "}
-          <Code>TypeScript</Code>.
-        </Text> */}
-        {/* TODO: USE CHAKRA */}
-        <form onSubmit={(e) => handleFileSubmit(e)}>
+        <form onSubmit={(e) => handleFileSubmit(e)} encType="multipart/form-data">
           <Input
             onChange={handleChange}
             name="files"
@@ -81,7 +83,6 @@ const Index = () => {
           />
           <Input type="submit" />
         </form>
-        {/* select input */}
         {allInputOptions.length > 0 && (
           <FormControl as="fieldset">
             <FormLabel as="legend">Select input features</FormLabel>
@@ -112,10 +113,6 @@ const Index = () => {
       </Main>
 
       <DarkModeSwitch />
-      {/* <Footer>
-        <Text>Next ❤️ Chakra</Text>
-      </Footer>
-      <CTA /> */}
     </Container>
   );
 };

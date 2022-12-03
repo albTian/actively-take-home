@@ -1,3 +1,4 @@
+from contextvars import ContextVar
 from typing import Union, List
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,7 +26,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-fileData: pd.DataFrame
+# fileData: pd.DataFrame
+
+var: ContextVar[pd.DataFrame] = ContextVar('var')
+
+some_var = ContextVar("some_var", default="default value")
+
 
 class Item(BaseModel):
     name: str
@@ -51,6 +57,9 @@ def update_item(item_id: int, item: Item):
 @app.post("/uploadfile/")
 async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     fileData = pd.read_csv(file.file)
+    var.set(fileData)
+    some_var.set(fileData)
+    
 
     allInputOptions = []
     allOutputOptions = []
@@ -65,8 +74,14 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
     background_tasks.add_task(file.file.close)
     return {"message": f"Successfully uploaded {file.filename}", "allInputOptions": allInputOptions, "allOutputOptions": allOutputOptions}
 
+class ModelOptions(BaseModel):
+    outputOption: str
+    inputOptions: List[str]
+    # file: UploadFile = File(...)
 
 @app.post("/train_model")
-async def post_train_model(output: str, inputs: List[str]):
-    train_model(fileData, output, inputs)
+async def post_train_model(modelOptions: ModelOptions):
+    print(modelOptions)
+    # fileData = pd.read_csv(modelOptions.file.file)
+    # train_model(fileData, modelOptions.outputOption, modelOptions.inputOptions)
     return {"message": f"Successfully trained model"}
